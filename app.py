@@ -3,6 +3,10 @@ from flask import (
     flash, Flask, redirect, render_template, request, url_for
 )
 from werkzeug.utils import secure_filename
+from dotenv import load_dotenv
+
+# Load .env file
+load_dotenv()
 
 # Restraints and paths for image uploads
 UPLOAD_FOLDER = 'static/images/source'
@@ -11,6 +15,7 @@ ALLOWED_EXTENSIONS = {'png'}
 # initialize the app and configure the upload folder
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.secret_key = os.getenv('FLASK_SECRET_KEY')
 
 
 # check if file is correct type
@@ -42,6 +47,8 @@ def landing():
                 os.path.join(app.config['UPLOAD_FOLDER'], filename)
             )
             return f'<img src="{app.config["UPLOAD_FOLDER"]}/{filename}">'
+        else:
+            flash('Invalid file type.')
         
 
     return render_template('index.html')
