@@ -4,6 +4,7 @@ from flask import (
 )
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
+from PIL import Image
 
 # Load .env file
 load_dotenv()
