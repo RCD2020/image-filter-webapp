@@ -26,32 +26,37 @@ def allowed_file(filename):
 
 @app.route('/', methods=['GET', 'POST'])
 def landing():
-    if request.method == 'POST':
-        # check if the post request has the file part
-        if 'file' not in request.files:
-            flash('Must be a .png file.')
-            return render_template('index.html')
-        
-        # get POSTed file
-        file = request.files['file']
-
-        # check if anything was POSTed
-        if file.filename == '':
-            flash('No selected file.')
-            return render_template('index.html')
-        
-        # check that there is a file and is allowed type
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file.save(
-                os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            )
-            return f'<img src="{app.config["UPLOAD_FOLDER"]}/{filename}">'
-        else:
-            flash('Invalid file type.')
-        
-
     return render_template('index.html')
+
+
+@app.route('/filter', methods=['POST'])
+def filter_page():
+    # check if the post request has the file part
+    if 'file' not in request.files:
+        flash('Must be a .png file.')
+        return redirect('/')
+    
+    # get POSTed file
+    file = request.files['file']
+
+    # check if anything was POSTed
+    if file.filename == '':
+        flash('No selected file.')
+        return redirect('/')
+    
+    # check that there is a file and is allowed type
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        file.save(
+            os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        )
+        return render_template(
+            'filter.html',
+            path=f'{app.config["UPLOAD_FOLDER"]}/{filename}'
+        )
+    else:
+        flash('Invalid file type.')
+        return redirect('/')
 
 
 if __name__ == '__main__':
