@@ -25,6 +25,10 @@ def allowed_file(filename):
         and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
+def source_path(filename):
+    return f'{app.config["UPLOAD_FOLDER"]}/{filename}'
+
+
 @app.route('/', methods=['GET', 'POST'])
 def landing():
     if request.method == 'POST':
@@ -44,9 +48,7 @@ def landing():
         # check that there is a file and is allowed type
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            file.save(
-                os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            )
+            file.save(source_path(filename))
             return redirect(url_for(
                 'filter_page',
                 filename=filename
@@ -60,10 +62,20 @@ def landing():
 
 @app.route('/filter/<filename>')
 def filter_page(filename):
-    
+    height, width = 0,0
+    try:
+        with Image.open(source_path(filename)) as img:
+            width, height = img.size
+    except:
+        flash(f'Could not open {filename}')
+        redirect('/')
+
+    factor = 300 / min(width, height)
+    width *= factor
+    height *= factor
 
     return render_template(
-        'filter.html', path=filename
+        'filter.html', path=filename, height=height, width=width
     )
     
 
