@@ -5,6 +5,7 @@ from flask import (
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
 from PIL import Image
+from imgfilter import ImgFilter
 
 # Load .env file
 load_dotenv()
@@ -60,6 +61,12 @@ def landing():
     return render_template('index.html')
 
 
+@app.route('/filter')
+def filter_noargs():
+    flash('Must have image name in url')
+    return redirect('/')
+
+
 @app.route('/filter/<filename>')
 def filter_page(filename):
     height, width = 0,0
@@ -68,7 +75,7 @@ def filter_page(filename):
             width, height = img.size
     except:
         flash(f'Could not open {filename}')
-        redirect('/')
+        return redirect('/')
 
     factor = 300 / min(width, height)
     width *= factor
@@ -83,10 +90,13 @@ def filter_page(filename):
 def filtered_page():
     filter_text = request.form.get('filter-text')
 
-    if not filter_text:
+    if filter_text == '':
         flash('No filter provided')
-        redirect()
-
+        return redirect(url_for(
+            'filter_page', filename=request.form.get('filename')
+        ))
+    
+    return render_template('filtered.html')
 
 if __name__ == '__main__':
     app.run(debug=True)

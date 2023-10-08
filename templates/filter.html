@@ -4,8 +4,10 @@
 
 <img src="/static/images/source/{{ path }}" height="{{ height }}" width="{{ width }}">
 
-<form>
+<form method="post" action="/filtered">
+    <input type="hidden" name="filename" value="{{ path }}">
     <textarea name="filter-text"></textarea>
+    <input type="submit" value="Submit">
 </form>
 
 {% endblock %}
