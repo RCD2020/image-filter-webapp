@@ -70,44 +70,113 @@ class Tokenizer:
         self.current = None
 
 
-    def isKeyword(self, x):
+    def isKeyword(self, x) -> bool:
         return self.keywords.find(' ' + x + ' ') >= 0
     
 
-    def isDigit(self, ch):
+    def isDigit(self, ch) -> bool:
         return re.search('[0-9]', ch)
     
 
-    def isIdStart(self, ch):
+    def isIdStart(self, ch) -> bool:
         return re.search('[A-Za-z_]', ch)
     
     
-    def isId(self, ch):
+    def isId(self, ch) -> bool:
         return self.isIdStart(ch) or re.search("[0-9]", ch)
     
 
-    def isOpChar(self, ch):
+    def isOpChar(self, ch) -> bool:
         return '+-*/%=&|<>!'.find(ch) >= 0
     
 
-    def isPunc(self, ch):
+    def isPunc(self, ch) -> bool:
         return ',;(){}[]'.find(ch) >= 0
     
 
-    def isWhitespace(self, ch):
+    def isWhitespace(self, ch) -> bool:
         return ' \t\n'.find(ch) >= 0
     
 
-    def readWhile(self, predicate):
+    def readWhile(self, predicate) -> str:
         text = ''
         while not self.stream.eof() and predicate(self.stream.peek()):
             text += self.stream.next()
         return text
+
+
+    def isNum(self, ch) -> bool:
+        if ch == '.':
+            if self._hasDot:
+                return False
+            self._hasDot = True
+            return True
+        return self.isDigit(ch)
     
 
-    def readNumber(self):
-        pass
+    def readNumber(self) -> Token:
+        self._hasDot = False
 
+        num = self.readWhile(self.isNum)
+
+        if self._hasDot:
+            num = float(num)
+        else:
+            num = int(num)
+        
+        return Token('num', num)
+
+        
+    def readIdent(self) -> Token:
+        id = self.readWhile(self.isId)
+        return Token('kw' if self.isKeyword(id) else 'var', id)
+    
+
+    def skipComment(self) -> None:
+        self.readWhile(lambda ch : ch != '\n')
+        self.stream.next()
+
+    
+    def readNext(self) -> Token:
+        self.readWhile(self.isWhitespace)
+        if self.stream.eof():
+            return None
+        
+        ch = self.stream.peek()
+
+        if ch == '#':
+            self.skipComment()
+            return self.readNext()
+        
+        if self.isDigit(ch):
+            return self.readNumber()
+        
+        if self.isIdStart(ch):
+            return self.readIdent()
+        
+        if self.isPunc(ch):
+            return Token('punc', self.stream.next())
+        
+        if self.isOpChar(ch):
+            return Token('op', self.readWhile(self.isOpChar))
+        
+        self.stream.throw(ch)
+
+    
+    def peek(self):
+        if self.current == None:
+            self.current = self.readNext()
+        return self.current
+        
+
+    def next(self):
+        tok = current
+        current = None
+        return tok or self.readNext()
+    
+
+    def eof(self):
+        return self.peek() == None
 
 
 class ImgFilter:
