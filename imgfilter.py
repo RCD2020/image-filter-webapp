@@ -41,6 +41,10 @@ class InputStream:
         return self.peek() == ''
     
 
+    def throw(self, ch):
+        raise SyntaxError(f'Cannot handle "{ch}". {self}')
+    
+
     def __str__(self) -> str:
         return f'InputStream(pos: {self.pos}, line: {self.line}, col: {self.col})'
     
@@ -69,5 +73,6 @@ class ImgFilter:
             
 
 if __name__ == '__main__':
-    pass
+    # InputStream.throw('@')
     # ImgFilter.readCode('test = 54 + 6')
+    pass
