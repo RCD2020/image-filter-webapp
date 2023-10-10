@@ -48,7 +48,10 @@ class InputStream:
     
 
     def __str__(self) -> str:
-        return f'InputStream(pos: {self.pos}, line: {self.line}, col: {self.col})'
+        return (
+            f'InputStream(pos: {self.pos}, line: {self.line}, '
+            f'col: {self.col})'
+        )
     
 
     def __repr__(self) -> str:
@@ -66,6 +69,61 @@ class Token:
 
     def __str__(self):
         return f'Token(type: {self.type}, value: {self.value})'
+    
+
+class BinaryToken(Token):
+    def __init__(self, tType: str, value, left, right):
+        super().__init__(tType, value)
+        self.left = left
+        self.right = right
+
+    
+    def __str__(self):
+        return (
+            f'BinaryToken(type: {self.type}, value: {self.value}, '
+            f'left: {self.left}, right: {self.right})'
+        )
+    
+
+class CallToken(Token):
+    def __init__(self, tType: str, value, args: list):
+        super().__init__(tType, value)
+        self.args = args
+
+    
+    def __str__(self):
+        return (
+            f'CallToken(type: {self.type}, value: {self.value}, '
+            f'args: {self.args})'
+        )
+    
+
+class IfToken(Token):
+    def __init__(self, tType: str, value, then, otherwise = None):
+        super().__init__(tType, value)
+        self.then = then
+        self.otherwise = otherwise
+
+    
+    def __str__(self):
+        return (
+            f'IfToken(type: {self.type}, value: {self.value}, ',
+            f'then: {self.then}, otherwise: {self.otherwise})'
+        )
+    
+
+class FuncToken(Token):
+    def __init__(self, tType: str, variables, body):
+        self.type = tType
+        self.vars = variables
+        self.body = body
+
+
+    def __str__(self):
+        return (
+            f'FuncToken(type: {self.type}, vars: {self.vars}, '
+            f'body: {self.body})'
+        )
 
 
 class Tokenizer:
@@ -85,7 +143,7 @@ class Tokenizer:
 
         # To ensure that keywords aren't searched for in the middle of
         # other keywords, all the keywords are surrounded with spaces
-        return " if then else lambda true false ".find(' ' + x + ' ') >= 0
+        return " if else lambda true false ".find(' ' + x + ' ') >= 0
     
 
     def isDigit(self, ch) -> bool:
@@ -144,7 +202,7 @@ class Tokenizer:
         """Returns true if ch is a valid digit for a number, and is not
         a repeating decimal point."""
 
-        # If ., then either return False signifying that a decimal has
+        # If '.', then either return False signifying that a decimal has
         # already been read in or return True and mark the decimal as
         # having been read in
         if ch == '.':
@@ -338,10 +396,96 @@ class Parser:
         self.input.throw(f'Unexpected Token: {self.input.peek()}')
 
 
-    def maybeBinary(self, left, myPrec):
+    def maybeBinary(self, left, prec):
         token = self.isOp()
+
+        if token:
+            valPrec = self.PRECEDENCE[token.value]
+
+            if valPrec > prec:
+                self.input.next()
+
+                return self.maybeBinary(
+                    BinaryToken(
+                        'assign' if token.value == '=' else 'binary',
+                        token.value,
+                        left,
+                        self.maybeBinary(self.parseAtom(), valPrec)
+                    ),
+                    prec
+                )
             
+        return left
+    
+
+    def delimited(self, start, stop, separator, parser):
+        a = []
+        first = True
+
+        self.skipPunc(start)
+
+        while not self.input.eof():
+            if self.isPunc(stop):
+                break
+
+            if first:
+                first = False
+            else:
+                self.skipPunc(separator)
+
+            if self.isPunc(stop):
+                break
+            
+            a.append(parser())
+        
+        self.skipPunc(stop)
+        return a
+    
+
+    def parseCall(self, func):
+        return CallToken(
+            'call',
+            func,
+            self.delimited('(', ')', ',', self.parseExpression)
+        )
+    
+
+    def parseVarName(self):
+        name = self.input.next()
+
+        if name.type != 'var':
+            self.input.throw(f'Expecting variable name, got {name}')
+
+        return name.value
+    
+
+    def parseIf(self):
+        self.skipKw('if')
+
+        cond = self.parseExpression()
+
+        then = self.parseExpression()
+
+        ret = IfToken(
+            'if',
+            cond,
+            then
+        )
+
+        if self.isKw('else'):
+            self.input.next()
+            ret.otherwise = self.parseExpression()
+
+        return ret
+    
+
+    def parseLambda(self):
+        return FuncToken(
+            'lambda',
+            self.delimited('(', ')', ',', self.parseVarName),
+            self.parseExpression()
+        )
+
 
 if __name__ == '__main__':
-    # InputStream.throw('@')
     pass
