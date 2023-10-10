@@ -258,8 +258,31 @@ class Tokenizer:
 
     def eof(self):
         "Returns true if at the end of the file."
-        
+
         return self.peek() == None
+    
+
+class Parser:
+    FALSE = { 'type': 'bool', 'value': False }
+    PRECEDENCE = {
+        '=': 1, '||': 2, '&&': 3,
+        '<': 7, '>': 7, '<=': 7, '>=': 7, '==': 7, '!=': 7,
+        '+': 10, '-': 10,
+        '*': 20, '/': 20, '%': 20
+    }
+
+    def __init__(self, tokenizer: Tokenizer):
+        self.input = tokenizer
+    
+    
+    def isPunc(self, ch):
+        token = self.input.peek()
+        return (
+            token
+            and token.type == 'punc'
+            and (not ch or token.value == ch)
+            and token
+        )
             
 
 if __name__ == '__main__':
