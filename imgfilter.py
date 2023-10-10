@@ -41,10 +41,10 @@ class InputStream:
         return self.peek() == ''
     
 
-    def throw(self, ch):
+    def throw(self, msg):
         "Error message for unexpected characters."
 
-        raise SyntaxError(f'Cannot handle "{ch}". {self}')
+        raise SyntaxError(f'\033[31m{self}: {msg}\033[00m')
     
 
     def __str__(self) -> str:
@@ -228,7 +228,7 @@ class Tokenizer:
             return Token('op', self.readWhile(self.isOpChar))
         
         # Throws SyntaxError if ch doesn't fit into any group
-        self.stream.throw(ch)
+        self.stream.throw(f'Unexpected character "{ch}"')
 
     
     def peek(self):
@@ -262,6 +262,14 @@ class Tokenizer:
         return self.peek() == None
     
 
+    def throw(self, msg):
+        self.stream.throw(f'{self}: {msg}')
+
+
+    def __str__(self):
+        return 'Tokenizer()'
+    
+
 class Parser:
     FALSE = { 'type': 'bool', 'value': False }
     PRECEDENCE = {
@@ -283,6 +291,55 @@ class Parser:
             and (not ch or token.value == ch)
             and token
         )
+    
+
+    def isKw(self, kw):
+        token = self.input.peek()
+        return (
+            token
+            and token.type == 'kw'
+            and (not kw or token.value == kw)
+            and token
+        )
+    
+
+    def isOp(self, op = None):
+        token = self.input.peek()
+        return (
+            token
+            and token.type == 'op'
+            and (not op or token.value == op)
+            and token
+        )
+    
+
+    def skipPunc(self, ch):
+        if self.isPunc(ch):
+            self.input.next()
+        else:
+            self.input.throw(f'Expecting punctuation, got "{ch}"')
+
+
+    def skipKw(self, kw):
+        if self.isKw(kw):
+            self.input.next()
+        else:
+            self.input.throw(f'Expecting keyword, got "{kw}"')
+
+    
+    def skipOp(self, op):
+        if self.isOp(op):
+            self.input.next()
+        else:
+            self.input.throw(f'Expecting operator, got "{op}"')
+
+    
+    def unexpected(self):
+        self.input.throw(f'Unexpected Token: {self.input.peek()}')
+
+
+    def maybeBinary(self, left, myPrec):
+        token = self.isOp()
             
 
 if __name__ == '__main__':
