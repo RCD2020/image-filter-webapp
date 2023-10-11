@@ -485,6 +485,76 @@ class Parser:
             self.delimited('(', ')', ',', self.parseVarName),
             self.parseExpression()
         )
+    
+
+    def parseBool(self):
+        return Token('bool', self.input.next().value == 'true')
+    
+
+    def maybeCall(self, expr):
+        expr = expr()
+        return self.parseCall(expr) if self.isPunc('(') else expr
+    
+    
+    def _parseAtomHelper(self):
+        if self.isPunc('('):
+            self.input.next()
+            expr = self.parseExpression()
+            self.skipPunc(')')
+            return expr
+        
+        if self.isPunc('{'):
+            return self.parseProg()
+        
+        if self.isKw('if'):
+            return self.parseIf()
+        
+        if self.isKw('true') or self.isKw('false'):
+            return self.parseBool()
+        
+        if self.isKw('lambda'):
+            self.input.next()
+            return self.parseLambda()
+        
+        token = self.input.next()
+        if token.type == 'var' or token.type == 'num':
+            return token
+        
+        self.unexpected()
+
+
+    def parseAtom(self):
+        return self.maybeCall(self._parseAtomHelper)
+    
+
+    def parseTopLevel(self):
+        prog = []
+
+        while not self.input.eof():
+            prog.append(self.parseExpression())
+            if not self.input.eof():
+                self.skipPunc(';')
+
+        return Token('prog', prog)
+    
+
+    def parseProg(self):
+        prog = self.delimited('{', '}', ';', self.parseExpression)
+
+        if len(prog) == 0:
+            return False
+        if len(prog) == 1:
+            return prog[0]
+        
+        return Token('prog', prog)
+    
+
+    def _parseExprHelper(self):
+        return self.maybeBinary(self.parseAtom(), 0)
+    
+
+    def parseExpression(self):
+        return self.maybeCall(self._parseExprHelper)
 
 
 if __name__ == '__main__':
