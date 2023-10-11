@@ -72,6 +72,9 @@ class Token:
     
 
 class BinaryToken(Token):
+    """This is a binary token. This defines chunks of data where a
+    binary operation takes place."""
+
     def __init__(self, tType: str, value, left, right):
         super().__init__(tType, value)
         self.left = left
@@ -86,6 +89,9 @@ class BinaryToken(Token):
     
 
 class CallToken(Token):
+    """This is a call token. This defines a call to a function and its
+    parameters."""
+
     def __init__(self, tType: str, value, args: list):
         super().__init__(tType, value)
         self.args = args
@@ -99,6 +105,9 @@ class CallToken(Token):
     
 
 class IfToken(Token):
+    """This is an if token. It defines a chunk of data as an if
+    statement."""
+
     def __init__(self, tType: str, value, then, otherwise = None):
         super().__init__(tType, value)
         self.then = then
@@ -113,6 +122,9 @@ class IfToken(Token):
     
 
 class FuncToken(Token):
+    """This is a func token. It defines a function, its variables, and
+    the programming within."""
+
     def __init__(self, tType: str, variables, body):
         self.type = tType
         self.vars = variables
@@ -321,6 +333,8 @@ class Tokenizer:
     
 
     def throw(self, msg):
+        "Throws an error"
+
         self.stream.throw(f'{self}: {msg}')
 
 
@@ -329,7 +343,12 @@ class Tokenizer:
     
 
 class Parser:
-    FALSE = { 'type': 'bool', 'value': False }
+    """The Parser class will interpret our tokens make from the
+    Tokenizer and group them together in a more programmatic way,
+    making it all into a collection of tokens that contain each other"""
+
+    # The PRECEDENCE defines the order of operations of operators
+    # The higher the value, the higher the precedence
     PRECEDENCE = {
         '=': 1, '||': 2, '&&': 3,
         '<': 7, '>': 7, '<=': 7, '>=': 7, '==': 7, '!=': 7,
@@ -342,17 +361,34 @@ class Parser:
     
     
     def isPunc(self, ch):
+        """Returns a token if ch is punctuation or the next token is
+        punctuation, otherwise returns False."""
+
+        # Looks at next token
         token = self.input.peek()
+
+        # If the token is of type 'punc', ch is None or the value of the
+        # next token is equal to ch, then return the token
         return (
+            # Token is checked first so that an error doesn't throw
+            # because of trying to access members of None
             token
             and token.type == 'punc'
             and (not ch or token.value == ch)
+            # Having token come last allows this statement to return
+            # token instead of returning True
             and token
         )
     
 
     def isKw(self, kw):
+        """Returns a token is kw is a keyword or if the next token is a
+        keyword, otherwise returns False."""
+
+        # Looks at next token
         token = self.input.peek()
+
+        # See self.isPunc for explanation
         return (
             token
             and token.type == 'kw'
@@ -362,7 +398,13 @@ class Parser:
     
 
     def isOp(self, op = None):
+        """Returns a token is op is an operator or if the next token is
+        an operator, otherwise returns False."""
+
+        # Looks at next token
         token = self.input.peek()
+
+        # See self.isPunc for explanation
         return (
             token
             and token.type == 'op'
@@ -542,7 +584,7 @@ class Parser:
         prog = self.delimited('{', '}', ';', self.parseExpression)
 
         if len(prog) == 0:
-            return False
+            return Token('bool', False)
         if len(prog) == 1:
             return prog[0]
         
