@@ -414,39 +414,77 @@ class Parser:
     
 
     def skipPunc(self, ch):
+        """Checks if the next token is the expected ch (character), and
+        skips it if so, otherwise throws an error."""
+
+        # Looks at next token and checks if its value matches ch
         if self.isPunc(ch):
+            # Skips next token if so
             self.input.next()
         else:
-            self.input.throw(f'Expecting punctuation, got "{ch}"')
+            # Else throws an exception
+            self.input.throw(
+                f'Expecting {ch}, got "{self.input.peek()}"'
+            )
 
 
     def skipKw(self, kw):
+        """Checks if the next token is the expected kw (keyword), and
+        skips it if so, otherwise throws an error."""
+
+        # Looks at next token and checks if its next value matches kw
         if self.isKw(kw):
+            # Skips next token if so
             self.input.next()
         else:
-            self.input.throw(f'Expecting keyword, got "{kw}"')
+            # Else throws an exception
+            self.input.throw(
+                f'Expecting {kw}, got "{self.input.peek()}"'
+            )
 
     
     def skipOp(self, op):
+        """Checks if the next token is the expected op (operator), and
+        skips it if so, otherwise throws an error."""
+
+        # Looks at next token and checks if its next value matches op
         if self.isOp(op):
+            # Skips next token if so
             self.input.next()
         else:
-            self.input.throw(f'Expecting operator, got "{op}"')
+            # Else throws an exception
+            self.input.throw(
+                f'Expecting {op}, got "{self.input.peek()}"'
+            )
 
     
     def unexpected(self):
+        "Throws an error, call when encountering an unexpected token."
+
         self.input.throw(f'Unexpected Token: {self.input.peek()}')
 
 
     def maybeBinary(self, left, prec):
+        """Checks if the next token is a binary operator as opposed to a
+        unary one, and returns a BinaryToken if so. Otherwise, returns 
+        the given Token."""
+
+        # Peeks next token if it is an operator
         token = self.isOp()
 
+        # If an operator token was returned:
         if token:
+            # Get the precedence of the operator in the token
             valPrec = self.PRECEDENCE[token.value]
 
+            # If the operator precedence is greater than the given
+            # precedence:
             if valPrec > prec:
+                # Move to next token
                 self.input.next()
 
+                # Return a BinaryToken, while potentially filling it
+                # with more operations
                 return self.maybeBinary(
                     BinaryToken(
                         'assign' if token.value == '=' else 'binary',
@@ -456,20 +494,32 @@ class Parser:
                     ),
                     prec
                 )
-            
+        
+        # If next token isn't an operator, return the given Token
         return left
     
 
     def delimited(self, start, stop, separator, parser):
+        """Grabs all token between start and stop, separating
+        by separator, and parsing via parser."""
+
+        # List for tokens
         a = []
+        # Ensures that an error isn't thrown looking for punctuation
+        # preceding the first token
         first = True
 
+        # Skips leading delimiter
         self.skipPunc(start)
 
+        # Reads tokens until eof file or break
         while not self.input.eof():
+
+            # Checks for trailing delimiter and breaks if matches
             if self.isPunc(stop):
                 break
 
+            # If first Token, then do not check for separator
             if first:
                 first = False
             else:
@@ -478,13 +528,19 @@ class Parser:
             if self.isPunc(stop):
                 break
             
+            # Append parsed token
             a.append(parser())
         
+        # Skips trailing delimiter
         self.skipPunc(stop)
+        # Returns list of parsed tokens
         return a
     
 
     def parseCall(self, func):
+        """Parses a function call, returns a CallToken containing the
+        function and its parameters."""
+
         return CallToken(
             'call',
             func,
@@ -492,11 +548,16 @@ class Parser:
         )
     
 
-    def parseVarName(self):
+    def parseVarName(self) -> str:
+        """Parses a variable name, returns the name, and throws an error
+        if the next token is not a variable name."""
+
+        # Advance to next token
         name = self.input.next()
 
+        # If Token.type is not 'var', throw an error
         if name.type != 'var':
-            self.input.throw(f'Expecting variable name, got {name}')
+            self.input.throw(f'Expecting var token, got {name}')
 
         return name.value
     
