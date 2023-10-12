@@ -717,5 +717,35 @@ class Parser:
         return self.maybeCall(self._parseExprHelper)
 
 
+class Environment:
+    def __init__(self, vars : dict = dict(), parent = None):
+        self.parent : Environment = parent
+        self.vars = vars
+
+
+    def _lookup(self, key):
+        if key in self.vars:
+            return True
+        
+        if not self.parent:
+            return False
+
+        return self.parent._lookup(key)
+
+    
+    def __getitem__(self, key):
+        if key in self.vars:
+            return self.vars[key]
+        
+        if self.parent and self.parent._lookup(key):
+            return self.parent[key]
+        
+        raise KeyError(key)
+    
+
+    def __setitem__(self, key, value):
+        self.vars[key] = value
+
+
 if __name__ == '__main__':
     pass
