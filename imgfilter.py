@@ -764,8 +764,20 @@ class Environment:
 
     def __setitem__(self, key, value):
         "Adds new variable to scope."
-        
+
         self.vars[key] = value
+
+
+class ImgFilter:
+    def __init__(self, imgname):
+        with Image.open(f'static/images/source/{imgname}') as self.img:
+            self.pixels = self.img.load()
+
+        self.width = self.img.size[0]
+        self.height = self.img.size[1]
+
+    def evaluate(self):
+        pass
 
 
 if __name__ == '__main__':
