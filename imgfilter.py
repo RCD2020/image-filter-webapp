@@ -563,18 +563,25 @@ class Parser:
     
 
     def parseIf(self):
+        "Parses an if statement, returns an IfToken."
+
+        # Skips past 'if' keyword
         self.skipKw('if')
 
+        # Reads a conditional expression
         cond = self.parseExpression()
 
+        # Reads if logic
         then = self.parseExpression()
 
+        # Generates the IfToken
         ret = IfToken(
             'if',
             cond,
             then
         )
 
+        # If next token is an 'else' keyword, then add else expression
         if self.isKw('else'):
             self.input.next()
             ret.otherwise = self.parseExpression()
@@ -583,58 +590,95 @@ class Parser:
     
 
     def parseLambda(self):
+        "Parses a lambda function, returns FuncToken."
+
         return FuncToken(
             'lambda',
+            # Grabs parameters between ( and )
             self.delimited('(', ')', ',', self.parseVarName),
+            # Parses the logic
             self.parseExpression()
         )
     
 
     def parseBool(self):
-        return Token('bool', self.input.next().value == 'true')
+        "Parses a bool, returns a Token containing boolean."
+
+        return Token(
+            'bool',
+            # Works because it will return True if the value is
+            # equal to true and False otherwise
+            self.input.next().value == 'true'
+        )
     
 
     def maybeCall(self, expr):
+        """Parses whether or not a function is being called. Returns a
+        CallToken if so, otherwise returning the inputted expression."""
+
         expr = expr()
         return self.parseCall(expr) if self.isPunc('(') else expr
     
     
     def _parseAtomHelper(self):
+        """Determines the type of the next Token, and parses
+        accordingly. Returns a Token of some sort."""
+
+        # If next Token is a '(', parse next Tokens as an expression
         if self.isPunc('('):
             self.input.next()
             expr = self.parseExpression()
             self.skipPunc(')')
             return expr
         
+        # If next Token is a '{', parse next Tokens as a program
         if self.isPunc('{'):
             return self.parseProg()
         
+        # If 'if', parse if statement
         if self.isKw('if'):
             return self.parseIf()
         
+        # If 'bool', parse boolean
         if self.isKw('true') or self.isKw('false'):
             return self.parseBool()
         
+        # If 'lambda', parse lambda function
         if self.isKw('lambda'):
             self.input.next()
             return self.parseLambda()
         
+        # All of the Token checks automatically advance Tokens,
+        # but because this isn't using a Token check, we advance it
+        # manually, and check if it's a variable name or number
         token = self.input.next()
         if token.type == 'var' or token.type == 'num':
             return token
         
+        # Throws an error because unknown Token
         self.unexpected()
 
 
     def parseAtom(self):
+        """Parses the next collection of Tokens, while also checking if
+        is a function call or not."""
+
         return self.maybeCall(self._parseAtomHelper)
     
 
     def parseTopLevel(self):
+        """Loops through all Tokens, adding all the classified Tokens
+        to a list, and then finally returning a Token containing the
+        program in Token form."""
+
         prog = []
 
+        # Loop through all tokens
         while not self.input.eof():
+            # Add parsed expressions to list
             prog.append(self.parseExpression())
+
+            # Skip semicolons
             if not self.input.eof():
                 self.skipPunc(';')
 
@@ -642,10 +686,17 @@ class Parser:
     
 
     def parseProg(self):
+        "Parses code in between {}, returns a Token of type 'prog'."
+
+        # Parses all the code in between the {}s
         prog = self.delimited('{', '}', ';', self.parseExpression)
 
+        # If there were no Tokens in between the {}s,
+        # return a False Token
         if len(prog) == 0:
             return Token('bool', False)
+        # Or if there was only one expression in the braces,
+        # just return the expression
         if len(prog) == 1:
             return prog[0]
         
@@ -653,10 +704,16 @@ class Parser:
     
 
     def _parseExprHelper(self):
+        """Parses expressions, determining whether they are binary
+        expressions in the process."""
+
         return self.maybeBinary(self.parseAtom(), 0)
     
 
     def parseExpression(self):
+        """Parses an expression, while also checking if it is a
+        function being called."""
+        
         return self.maybeCall(self._parseExprHelper)
 
 
