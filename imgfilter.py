@@ -142,8 +142,8 @@ class Tokenizer:
     """This is the tokenizer. Utilizing the InputStream, it converts
     data read in from the input into Tokens that define the data."""
 
-    def __init__(self, inputStream : InputStream):
-        self.stream = inputStream
+    def __init__(self, text : str):
+        self.stream = InputStream(text)
 
         # Because self.next doesn't always call self.readNext,
         # a current variable is needed to keep track of peeked tokens.
@@ -356,8 +356,8 @@ class Parser:
         '*': 20, '/': 20, '%': 20
     }
 
-    def __init__(self, tokenizer: Tokenizer):
-        self.input = tokenizer
+    def __init__(self, text: str):
+        self.input = Tokenizer(text)
     
     
     def isPunc(self, ch):
