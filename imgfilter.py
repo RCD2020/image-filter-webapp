@@ -718,32 +718,53 @@ class Parser:
 
 
 class Environment:
+    """The Environment class is keeps track of variables, as well as
+    ensuring that new variables are saved to the correct scope.
+    
+    It can be initialized with variables via vars, and can simulate
+    scope by giving it another instance of Environment via parent."""
+
+
     def __init__(self, vars : dict = dict(), parent = None):
-        self.parent : Environment = parent
+        # dictionary of variables in scope
         self.vars = vars
+        # parent Environment instance, used to simiulate scope
+        self.parent : Environment = parent
 
 
     def _lookup(self, key):
+        "Checks to see if key is in scope or parent's scope."
+
+        # Checks own scope
         if key in self.vars:
             return True
         
+        # Checks if there is a parent
         if not self.parent:
             return False
 
+        # Checks parent's scope
         return self.parent._lookup(key)
 
     
     def __getitem__(self, key):
+        "Gets item from either own scope or parent's scope."
+
+        # If key in scope, return value
         if key in self.vars:
             return self.vars[key]
         
+        # If key in parent, return value
         if self.parent and self.parent._lookup(key):
             return self.parent[key]
         
+        # KeyError, key not found
         raise KeyError(key)
     
 
     def __setitem__(self, key, value):
+        "Adds new variable to scope."
+        
         self.vars[key] = value
 
 
