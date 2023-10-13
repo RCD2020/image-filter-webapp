@@ -108,15 +108,15 @@ class IfToken(Token):
     """This is an if token. It defines a chunk of data as an if
     statement."""
 
-    def __init__(self, tType: str, value, then, otherwise = None):
-        super().__init__(tType, value)
+    def __init__(self, tType: str, cond, then, otherwise = None):
+        super().__init__(tType, cond)
         self.then = then
         self.otherwise = otherwise
 
     
     def __str__(self):
         return (
-            f'IfToken(type: {self.type}, value: {self.value}, ',
+            f'IfToken(type: {self.type}, cond: {self.value}, ',
             f'then: {self.then}, otherwise: {self.otherwise})'
         )
     
@@ -775,9 +775,57 @@ class ImgFilter:
 
         self.width = self.img.size[0]
         self.height = self.img.size[1]
+        self.env = Environment({
+            'pixels': self.pixels,
+            'width': self.width,
+            'height': self.height
+        })
 
-    def evaluate(self):
-        pass
+
+    def evaluate(self, token: Token, env):
+        typ = token.type
+
+        if typ in ('num', 'bool'):
+            return token.value
+        
+        if typ == 'var':
+            return env[token.value]
+        
+        if typ == 'assign':
+            if token.left.type != 'var':
+                raise SyntaxError(f'Cannot assign to {token.left}')
+            value = self.evaluate(token.right, env)
+            env[token.left.value] = value
+            return value
+        
+        if typ == 'binary':
+            return self.applyOp(
+                token.operator,
+                self.evaluate(token.left, env),
+                self.evaluate(token.right, env)
+            )
+
+        if typ == 'lambda':
+            return self.make_lambda(token, env)
+        
+        if typ == 'if':
+            cond = self.evaluate(token.cond, env)
+            if cond:
+                return self.evaluate(token.then, env)
+            elif token.otherwise:
+                return self.evaluate(token.otherwise, env)
+            else:
+                return False
+            
+        if typ == 'prog':
+            val = False
+            for expr in token.value:
+                val = self.evaluate(expr, env)
+            return val
+
+        if typ == 'call':
+            func = self.evaluate(token.value, env)
+            pass
 
 
 if __name__ == '__main__':
