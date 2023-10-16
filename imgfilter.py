@@ -319,7 +319,7 @@ class Tokenizer:
         # Read self.__init__ for better understanding of self.current
 
         # Saves potentially peeked token (current) to token
-        token = current
+        token = self.current
         # Wipes current clean
         current = None
         # Returns token if current was a token, or reads the next token
@@ -715,6 +715,13 @@ class Parser:
         function being called."""
         
         return self.maybeCall(self._parseExprHelper)
+    
+
+    def __call__(self):
+        """When an initated Parser class is called, it will parse
+        through the initialized text and return a list of tokens."""
+
+        return self.parseTopLevel()
 
 
 class Environment:
@@ -870,7 +877,23 @@ class ImgFilter:
             return self.evaluate(token.body, scope)
         
         return func
+    
+
+    def __call__(self, text):
+        tokens = Parser(text)()
+
+        self.evaluate(tokens, self.env)
 
 
 if __name__ == '__main__':
-    pass
+    with open('test.txt', 'r') as file:
+        text = file.read()
+
+    img = ImgFilter('Russia.png')
+    img.env['print'] = lambda x : print(x)
+
+    img(text)
+
+
+
+    
