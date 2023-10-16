@@ -6,7 +6,10 @@ class InputStream:
     characters from the input."""
 
     def __init__(self, text: str):
+        # self.text is the code that is being streamed
         self.text = text
+
+        # These are for showing where the stream is pointing
         self.pos = 0
         self.line = 1
         self.col = 0
@@ -15,6 +18,8 @@ class InputStream:
     def peek(self) -> str:
         "Returns the next value but without removing it from the stream"
 
+        # get character at pointed position,
+        # if out of bounds, return empty string
         try:
             return self.text[self.pos]
         except:
@@ -898,3 +903,4 @@ if __name__ == '__main__':
     img.env['print'] = lambda x : print(x)
 
     img(text)
+    print(img.env.vars)
