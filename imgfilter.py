@@ -155,7 +155,7 @@ class Tokenizer:
 
         # To ensure that keywords aren't searched for in the middle of
         # other keywords, all the keywords are surrounded with spaces
-        return " if else true false ".find(' ' + x + ' ') >= 0
+        return " if else lambda true false ".find(' ' + x + ' ') >= 0
     
 
     def isDigit(self, ch) -> bool:
@@ -644,9 +644,9 @@ class Parser:
             return self.parseBool()
         
         # If 'lambda', parse lambda function
-        # if self.isKw('lambda'):
-        #     self.input.next()
-        #     return self.parseLambda()
+        if self.isKw('lambda'):
+            self.input.next()
+            return self.parseLambda()
         
         # All of the Token checks automatically advance Tokens,
         # but because this isn't using a Token check, we advance it
@@ -805,8 +805,8 @@ class ImgFilter:
                 self.evaluate(token.right, env)
             )
 
-        # if typ == 'lambda':
-        #     return self.make_lambda(token, env)
+        if typ == 'lambda':
+            return self.make_lambda(token, env)
         
         if typ == 'if':
             cond = self.evaluate(token.cond, env)
@@ -824,10 +824,11 @@ class ImgFilter:
             return val
 
         if typ == 'call':
-            newScope = Environment(parent=env)
+            func = self.evaluate(token.value, env)
 
-            func = self.evaluate(token.value, newScope)
-            pass
+            return func(
+                None, [self.evaluate(arg, env) for arg in token.args]
+            )
 
 
 if __name__ == '__main__':
