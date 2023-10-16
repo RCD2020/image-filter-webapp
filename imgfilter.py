@@ -859,6 +859,17 @@ class ImgFilter:
         if op == '!=': return a != b
 
         raise SyntaxError(f'Unrecognized operator {op}')
+    
+
+    def makeLambda(self, token, env):
+        def func(self, argv):
+            names = token.vars
+            scope = Environment(parent=env)
+            for i in range(len(names)):
+                scope[names[i]] = argv[i] if i < len(argv) else False
+            return self.evaluate(token.body, scope)
+        
+        return func
 
 
 if __name__ == '__main__':
