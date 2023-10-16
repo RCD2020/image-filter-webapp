@@ -359,7 +359,6 @@ class Parser:
         '+': 10, '-': 10,
         '*': 20, '/': 20, '%': 20
     }
-    debugCount = 0
 
     def __init__(self, text: str):
         self.input = Tokenizer(text)
@@ -408,8 +407,6 @@ class Parser:
 
         # Looks at next token
         token = self.input.peek()
-
-        self.debug(token, 'isOp')
 
         # See self.isPunc for explanation
         return (
@@ -478,8 +475,6 @@ class Parser:
 
         # Peeks next token if it is an operator
         token = self.isOp()
-        self.debug(token, 'maybeBinary')
-        self.debug(left, 'maybeBinary')
 
         # If an operator token was returned:
         if token:
@@ -626,13 +621,8 @@ class Parser:
         CallToken if so, otherwise returning the inputted expression."""
 
         expr = expr()
-        self.debug(expr, 'maybeCall')
 
-        debug = self.parseCall(expr) if self.isPunc('(') else expr
-        self.debug(debug, 'maybeCall')
-        return debug
-
-        # return self.parseCall(expr) if self.isPunc('(') else expr
+        return self.parseCall(expr) if self.isPunc('(') else expr
     
     
     def _parseAtomHelper(self):
@@ -667,7 +657,6 @@ class Parser:
         # but because this isn't using a Token check, we advance it
         # manually, and check if it's a variable name or number
         token = self.input.next()
-        self.debug(token, '_parseAtomHelper')
         if token.type == 'var' or token.type == 'num':
             return token
         
@@ -678,11 +667,6 @@ class Parser:
     def parseAtom(self):
         """Parses the next collection of Tokens, while also checking if
         is a function call or not."""
-
-        self.debug(
-            'parseAtom -> _parseAtomHelper -> maybeCall',
-            'parseAtom'
-        )
 
         return self.maybeCall(self._parseAtomHelper)
     
@@ -698,7 +682,6 @@ class Parser:
         while not self.input.eof():
             # Add parsed expressions to list
             prog.append(self.parseExpression())
-            self.debug(prog, 'parseTopLevel')
 
             # Skip semicolons
             if not self.input.eof():
@@ -729,22 +712,12 @@ class Parser:
         """Parses expressions, determining whether they are binary
         expressions in the process."""
 
-        self.debug(
-            '_parseExprHelper -> parseAtom -> maybeBinary',
-            '_parseExprHelper'
-        )
-
         return self.maybeBinary(self.parseAtom(), 0)
     
  
     def parseExpression(self):
         """Parses an expression, while also checking if it is a
         function being called."""
-
-        self.debug(
-            'parseExpression -> _parseExprHelper -> maybeCall',
-            'parseExpression'
-        )
         
         return self.maybeCall(self._parseExprHelper)
     
@@ -754,13 +727,6 @@ class Parser:
         through the initialized text and return a list of tokens."""
 
         return self.parseTopLevel()
-    
-    
-    def debug(self, var, func):
-        return None
-
-        print(f'{self.debugCount}: {var} @ {func}\n')
-        self.debugCount += 1
 
 
 class Environment:
