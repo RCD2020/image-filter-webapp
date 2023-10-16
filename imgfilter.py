@@ -826,9 +826,39 @@ class ImgFilter:
         if typ == 'call':
             func = self.evaluate(token.value, env)
 
-            return func(
-                None, [self.evaluate(arg, env) for arg in token.args]
-            )
+            return func([self.evaluate(arg, env) for arg in token.args])
+        
+        raise SyntaxError(f'Unable to evaluate {token}')
+    
+
+    def apply_op(self, op, a, b):
+        def num(x):
+            if type(x) != int and type(x) != float:
+                raise TypeError(
+                    f'Expected int of float, got {x}, type {type(x)}'
+                )
+            return x
+        
+        def div(x):
+            if num(x) == 0:
+                raise ZeroDivisionError('division by zero')
+            return x
+        
+        if op == '+' : return num(a) + num(b)
+        if op == '-' : return num(a) - num(b)
+        if op == '*' : return num(a) * num(b)
+        if op == '/' : return num(a) / div(b)
+        if op == '%' : return num(a) % div(b)
+        if op == '&&': return a != False and b
+        if op == '||': return a if a != False else b
+        if op == '<' : return num(a) < num(b)
+        if op == '>' : return num(a) > num(b)
+        if op == '<=': return num(a) <= num(b)
+        if op == '>=': return num(a) >= num(b)
+        if op == '==': return a == b
+        if op == '!=': return a != b
+
+        raise SyntaxError(f'Unrecognized operator {op}')
 
 
 if __name__ == '__main__':
