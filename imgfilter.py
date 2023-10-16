@@ -351,6 +351,8 @@ class Tokenizer:
         return 'Tokenizer()'
     
 
+# I would like to convert this class into a function, as it doesn't
+# make use of anything exclusive to a class
 class Parser:
     """The Parser class will interpret our tokens make from the
     Tokenizer and group them together in a more programmatic way,
@@ -367,6 +369,10 @@ class Parser:
 
     def __init__(self, text: str):
         self.input = Tokenizer(text)
+        # Parses everything and saves it to tokens
+        # However, it would be better to convert our Parser class
+        # to a function, as that makes more sense
+        self.tokens = self.parseTopLevel()
     
     
     def isPunc(self, ch):
@@ -725,13 +731,6 @@ class Parser:
         function being called."""
         
         return self.maybeCall(self._parseExprHelper)
-    
-
-    def __call__(self):
-        """When an initated Parser class is called, it will parse
-        through the initialized text and return a list of tokens."""
-
-        return self.parseTopLevel()
 
 
 class Environment:
@@ -890,9 +889,9 @@ class ImgFilter:
     
 
     def __call__(self, text):
-        tokens = Parser(text)()
+        parser = Parser(text)
 
-        self.evaluate(tokens, self.env)
+        self.evaluate(parser.tokens, self.env)
 
 
 if __name__ == '__main__':
