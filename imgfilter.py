@@ -707,13 +707,16 @@ class Parser:
         )
     
 
-    def maybeCall(self, expr):
-        """Parses whether or not a function is being called. Return s a
-        CallToken if so, otherwise returning the inputted expression."""
+    def maybeAccess(self, expr):
+        """Parses whether or not a function is being called or indexed.
+        Returns a CallToken if being called, an IndexToken if being
+        indexed, otherwise returns the inputted expression."""
 
         expr = expr()
 
-        return self.parseCall(expr) if self.isPunc('(') else expr
+        if self.isPunc('('): return self.parseCall(expr)
+        if self.isPunc('['): return self.parseIndex(expr)
+        return expr
     
     
     def _parseAtomHelper(self):
@@ -763,7 +766,7 @@ class Parser:
         """Parses the next collection of Tokens, while also checking if
         is a function call or not."""
 
-        return self.maybeCall(self._parseAtomHelper)
+        return self.maybeAccess(self._parseAtomHelper)
     
 
     def parseTopLevel(self):
@@ -814,7 +817,7 @@ class Parser:
         """Parses an expression, while also checking if it is a
         function being called."""
         
-        return self.maybeCall(self._parseExprHelper)
+        return self.maybeAccess(self._parseExprHelper)
 
 
 class Environment:
