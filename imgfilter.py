@@ -117,6 +117,23 @@ class CallToken(Token):
         )
     
 
+class IndexToken(Token):
+    """This is an index token. This defines accessing a value in a list,
+    or for our purpose, accessing pixels."""
+
+    def __init__(self, tType: str, var, index):
+        self.type = tType
+        self.var = var
+        self.index = index
+
+    
+    def __str__(self):
+        return (
+            f'IndexToken(type: {self.type}, var: {self.var}, '
+            f'index: {self.index})'
+        )
+    
+
 class IfToken(Token):
     """This is an if token. It defines a chunk of data as an if
     statement."""
@@ -1049,7 +1066,7 @@ class ImgFilter:
 
 
 if __name__ == '__main__':
-    with open('test2.txt', 'r') as file:
+    with open('test.txt', 'r') as file:
         text = file.read()
 
     img = ImgFilter('Russia.png')
@@ -1057,3 +1074,4 @@ if __name__ == '__main__':
 
     img(text)
     print(img.env.vars)
+    img.show()
