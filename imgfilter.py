@@ -605,6 +605,17 @@ class Parser:
         )
     
 
+    def parseIndex(self, var):
+        """Parses an indice, returns a IndexToken containing the
+        variable name and its index."""
+
+        return IndexToken(
+            'index',
+            var,
+            self.delimited('[', ']', ',', self.parseExpression)
+        )
+    
+
     def parseVarName(self) -> str:
         """Parses a variable name, returns the name, and throws an error
         if the next token is not a variable name."""
