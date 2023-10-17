@@ -894,7 +894,8 @@ class ImgFilter:
             'pixels': self.pixels,
             'width': self.width,
             'height': self.height,
-            'rgb': lambda r, g, b : (r, g, b)
+            'rgb': lambda r, g, b : (r, g, b),
+            'loadColor': lambda x, y : self.loadColor(x, y)
         })
 
 
@@ -1088,6 +1089,14 @@ class ImgFilter:
             self.evaluate(token.incr, scope)
         
         return None
+    
+
+    def loadColor(self, x, y):
+        r, g, b = self.pixels[x, y]
+
+        self.env['r'] = r
+        self.env['g'] = g
+        self.env['b'] = b
     
 
     def __call__(self, text):
