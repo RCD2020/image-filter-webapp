@@ -90,11 +90,15 @@ class BinaryToken(Token):
         self.right = right
 
     
-    def __str__(self):
+    def __repr__(self):
         return (
             f'BinaryToken(type: {self.type}, value: {self.value}, '
             f'left: {self.left}, right: {self.right})'
         )
+    
+
+    def __str__(self):
+        return f'{self.left} {self.value} {self.right}'
     
 
 class CallToken(Token):
