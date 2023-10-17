@@ -354,7 +354,7 @@ class Tokenizer:
 # I would like to convert this class into a function, as it doesn't
 # make use of anything exclusive to a class
 class Parser:
-    """The Parser class will interpret our tokens make from the
+    """The Parser class will interpret the tokens made from the
     Tokenizer and group them together in a more programmatic way,
     making it all into a collection of tokens that contain each other"""
 
@@ -784,13 +784,25 @@ class Environment:
         self.vars[key] = value
 
 
+# This could also be made into a function, or we could apply multiple
+# filters to one image, which is an interesting idea
 class ImgFilter:
+    """The ImgFilter class will take the given image and open it, and
+    also evaluate the written code, giving it ways to access and filter
+    the given image."""
+
     def __init__(self, imgname):
+        # Opens the image and saves it to the class
         with Image.open(f'static/images/source/{imgname}') as self.img:
+            # Also saves the pixels, which is what we can edit to change
+            # the photo
             self.pixels = self.img.load()
 
+        # Saves the dimensions for use in the user's code
         self.width = self.img.size[0]
         self.height = self.img.size[1]
+
+        # Saves variables accessible to the user
         self.env = Environment({
             'pixels': self.pixels,
             'width': self.width,
@@ -799,33 +811,60 @@ class ImgFilter:
 
 
     def evaluate(self, token: Token, env):
+        """Reads tokens and returns and saves them in a way usable by
+        Python."""
+
+        # Gets the type of the given token
         typ = token.type
 
+        # If number or boolean, return the value as int, float, or bool
         if typ in ('num', 'bool'):
             return token.value
         
+        # If the name of a variable, return the value of the variable
         if typ == 'var':
             return env[token.value]
         
+        # If assignment token, then save the variable to the environment
         if typ == 'assign':
+            # If the token that is supposed to be saved to isn't a
+            # variable name, then throw an error
             if token.left.type != 'var':
                 raise SyntaxError(f'Cannot assign to {token.left}')
+            # Otherwise, evaluate the tokens that are supposed to be
+            # assigned to the variable
             value = self.evaluate(token.right, env)
+            # And then save it to the environment
             env[token.left.value] = value
+            # And return the value that was saved
             return value
         
+        # If it is a BinaryToken, then apply the operation
+        # and return the value
         if typ == 'binary':
             return self.applyOp(
-                token.value,
-                self.evaluate(token.left, env),
-                self.evaluate(token.right, env)
+                # First give the operator
+                op = token.value,
+                # Then the numbers that are being operated on
+                a  = self.evaluate(token.left, env),
+                b  = self.evaluate(token.right, env)
             )
 
+        # If it is a lambda token, then call makeLambda, a functino
+        # used for Interpreting functions and making them callable
         if typ == 'lambda':
             return self.makeLambda(token, env) 
         
+        # If it is an IfToken
         if typ == 'if':
+            # Evaluate the if condition
             cond = self.evaluate(token.value, env)
+
+            # If a condition is true,
+            # evaluate the then part of the IfToken
+            # else, evaluate otherwise of IfToken
+            # Finally return False if there was no condition
+            # and there was no otherwise statement
             if cond:
                 return self.evaluate(token.then, env)
             elif token.otherwise:
@@ -833,22 +872,36 @@ class ImgFilter:
             else:
                 return False
             
+        # If type 'prog', go through all the contained tokens
+        # and evaluate them, returning the value of the final token
         if typ == 'prog':
             val = False
             for expr in token.value:
                 val = self.evaluate(expr, env)
             return val
 
+        # If the Token is calling a function
         if typ == 'call':
+            # Get the function saved in memory by evaluating the name
+            # of the function
             func = self.evaluate(token.value, env)
 
+            # And then apply the saved args to the function using the
+            # splat operator to unpack it into the function
             return func(*[self.evaluate(arg, env) for arg in token.args])
         
+        # Raise an error if the token isn't recognized
         raise SyntaxError(f'Unable to evaluate {token}')
     
 
     def applyOp(self, op, a, b):
+        """The applyOp function will perform the given operation (op)
+        on a and b."""
+
         def num(x):
+            "This will ensure that x is operable."
+
+            # If it's not an int or a float, throw an error
             if type(x) != int and type(x) != float:
                 raise TypeError(
                     f'Expected int of float, got {x}, type {type(x)}'
@@ -856,10 +909,14 @@ class ImgFilter:
             return x
         
         def div(x):
+            """This will ensure that x is both not zero (so that other
+            numbers can be divided by it), and is operable."""
+
             if num(x) == 0:
                 raise ZeroDivisionError('division by zero')
             return x
         
+        # Applies the operator
         if op == '+' : return num(a) + num(b)
         if op == '-' : return num(a) - num(b)
         if op == '*' : return num(a) * num(b)
@@ -874,21 +931,42 @@ class ImgFilter:
         if op == '==': return a == b
         if op == '!=': return a != b
 
+        # Throw an error if unrecognized operator
         raise SyntaxError(f'Unrecognized operator {op}')
     
 
     def makeLambda(self, token, env):
+        """The makeLambda function will return a function that will
+        evaluate tokens and run them when called."""
+
+        # The function to be returned, this will
+        # usually be saved to the environment
         def func(*argv):
+            # Read the variable names given by the lambda token
             names = token.vars
+
+            # Create a new environment that will simulate scope,
+            # ensuring that variables saved in the function will not
+            # be accessible from outside of the function
             scope = Environment(parent=env)
+
+            # Saves the given parameters in *argv to the names given
+            # to the function inside the local scope
             for i in range(len(names)):
+                # If a position arg wasn't given, save it as False
                 scope[names[i]] = argv[i] if i < len(argv) else False
+            
+            # Returns the last read value
             return self.evaluate(token.body, scope)
         
+        # Returns the generated function
         return func
     
 
     def __call__(self, text):
+        """When an initiated ImgFilter class is called and given code
+        to read, it will run that code."""
+
         parser = Parser(text)
 
         self.evaluate(parser.tokens, self.env)
