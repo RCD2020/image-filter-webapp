@@ -89,14 +89,25 @@ def filter_page(filename):
 @app.route('/filtered', methods=['POST'])
 def filtered_page():
     filter_text = request.form.get('filter-text')
+    filename = request.form.get('filename')
 
     if filter_text == '':
         flash('No filter provided')
         return redirect(url_for(
-            'filter_page', filename=request.form.get('filename')
+            'filter_page', filename=filename
         ))
     
-    return render_template('filtered.html')
+    filter_text = filter_text.replace('\r', '\n')
+    # print(filter_text)
+    # splittee = filter_text.split('\n')
+    # for x in range(len(splittee)):
+    #     for y in range(len(splittee[x])):
+    #         print(x + y, splittee[x][y], ord(splittee[x][y]))
+    
+    imgFilter = ImgFilter(filename)
+    imgFilter(filter_text)
+    
+    return render_template('filtered.html', path=filename)
 
 if __name__ == '__main__':
     app.run(debug=True)
