@@ -155,17 +155,18 @@ class ForToken:
     """This is a for token. It defines a for loop, its initialization,
     its condition, and its increment condition."""
 
-    def __init__(self, tType: str, init, cond, incr):
+    def __init__(self, tType: str, init, cond, incr, body):
         self.type = tType
         self.init = init
         self.cond = cond
         self.incr = incr
+        self.body = body
 
     
     def __str__(self):
         return (
             f'ForToken(type: {self.type}, init: {self.init}, '
-            f'cond: {self.cond}, incr: {self.incr})'
+            f'cond: {self.cond}, incr: {self.incr}, body: {self.body})'
         )
 
 
@@ -643,25 +644,27 @@ class Parser:
     def parseFor(self):
         "Parses a for loop, returns ForToken."
 
+        # Skips for keyword
         self.input.next()
+        # Skips first parenthese
         self.skipPunc('(')
 
+        # Gets expressions in the for loop
         init = self.parseExpression()
         self.skipPunc(';')
         cond = self.parseExpression()
         self.skipPunc(';')
         incr = self.parseExpression()
+        self.skipPunc(')')
+        body = self.parseProg()
 
-        print(init)
-        print(cond)
-        print(incr)
-
+        # Returns ForToken
         return ForToken(
             'for',
             init = init,
             cond = cond,
-            incr = incr
-
+            incr = incr,
+            body = body
         )
     
 
@@ -941,7 +944,13 @@ class ImgFilter:
 
             # And then apply the saved args to the function using the
             # splat operator to unpack it into the function
-            return func(*[self.evaluate(arg, env) for arg in token.args])
+            return func(
+                *[self.evaluate(arg, env) for arg in token.args]
+            )
+        
+        # If the Token is a for loop
+        if typ == 'for':
+            return self.forEval(token, env)
         
         # Raise an error if the token isn't recognized
         raise SyntaxError(f'Unable to evaluate {token}')
@@ -1016,6 +1025,20 @@ class ImgFilter:
         return func
     
 
+    def forEval(self, token, env):
+        "Loops through for loop while its condition is true."
+
+        scope = Environment(parent=env)
+
+        self.evaluate(token.init, env)
+
+        while self.evaluate(token.cond, env):
+            self.evaluate(token.body, env)
+            self.evaluate(token.incr, env)
+        
+        return None
+    
+
     def __call__(self, text):
         """When an initiated ImgFilter class is called and given code
         to read, it will run that code."""
@@ -1026,7 +1049,7 @@ class ImgFilter:
 
 
 if __name__ == '__main__':
-    with open('test.txt', 'r') as file:
+    with open('test2.txt', 'r') as file:
         text = file.read()
 
     img = ImgFilter('Russia.png')
