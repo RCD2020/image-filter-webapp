@@ -764,7 +764,7 @@ class Parser:
 
     def parseAtom(self):
         """Parses the next collection of Tokens, while also checking if
-        is a function call or not."""
+        is a function call or an index."""
 
         return self.maybeAccess(self._parseAtomHelper)
     
@@ -815,7 +815,7 @@ class Parser:
  
     def parseExpression(self):
         """Parses an expression, while also checking if it is a
-        function being called."""
+        function being called or a variable being indexed."""
         
         return self.maybeAccess(self._parseExprHelper)
 
