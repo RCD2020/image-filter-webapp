@@ -879,6 +879,7 @@ class ImgFilter:
     the given image."""
 
     def __init__(self, imgname):
+        self.imgname = imgname
         # Opens the image and saves it to the class
         with Image.open(f'static/images/source/{imgname}') as self.img:
             # Also saves the pixels, which is what we can edit to change
@@ -1107,15 +1108,14 @@ class ImgFilter:
         parser = Parser(text)
 
         self.evaluate(parser.tokens, self.env)
+        self.img.save(f'static/images/filtered/{self.imgname}')
 
 
 if __name__ == '__main__':
-    with open('test2.txt', 'r') as file:
+    with open('filters/grayscale.txt', 'r') as file:
         text = file.read()
 
     img = ImgFilter('Russia.png')
     img.env['print'] = lambda x : print(x)
 
     img(text)
-    print(img.env.vars)
-    img.img.show()
