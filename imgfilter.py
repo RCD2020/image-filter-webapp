@@ -636,6 +636,31 @@ class Parser:
         )
     
 
+    def parseFor(self):
+        "Parses a for loop, returns ForToken."
+
+        self.input.next()
+        self.skipPunc('(')
+
+        init = self.parseExpression()
+        self.skipPunc(';')
+        cond = self.parseExpression()
+        self.skipPunc(';')
+        incr = self.parseExpression()
+
+        print(init)
+        print(cond)
+        print(incr)
+
+        return ForToken(
+            'for',
+            init = init,
+            cond = cond,
+            incr = incr
+
+        )
+    
+
     def parseBool(self):
         "Parses a bool, returns a Token containing boolean."
 
@@ -683,6 +708,10 @@ class Parser:
         if self.isKw('lambda'):
             self.input.next()
             return self.parseLambda()
+        
+        # If 'for', parse for loop
+        if self.isKw('for'):
+            return self.parseFor()
         
         # All of the Token checks automatically advance Tokens,
         # but because this isn't using a Token check, we advance it
