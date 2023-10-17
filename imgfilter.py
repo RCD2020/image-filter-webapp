@@ -406,7 +406,7 @@ class Parser:
         '=': 1, '||': 2, '&&': 3,
         '<': 7, '>': 7, '<=': 7, '>=': 7, '==': 7, '!=': 7,
         '+': 10, '-': 10,
-        '*': 20, '/': 20, '%': 20
+        '*': 20, '/': 20, '%': 20, '//': 20
     }
 
     def __init__(self, text: str):
@@ -1044,6 +1044,7 @@ class ImgFilter:
         if op == '>=': return num(a) >= num(b)
         if op == '==': return a == b
         if op == '!=': return a != b
+        if op == '//': return num(a) // div(b)
 
         # Throw an error if unrecognized operator
         raise SyntaxError(f'Unrecognized operator {op}')
@@ -1109,7 +1110,7 @@ class ImgFilter:
 
 
 if __name__ == '__main__':
-    with open('test.txt', 'r') as file:
+    with open('test2.txt', 'r') as file:
         text = file.read()
 
     img = ImgFilter('Russia.png')
