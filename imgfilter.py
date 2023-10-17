@@ -182,7 +182,9 @@ class Tokenizer:
 
         # To ensure that keywords aren't searched for in the middle of
         # other keywords, all the keywords are surrounded with spaces
-        return " if else lambda true false ".find(' ' + x + ' ') >= 0
+        return " if else lambda true false for ".find(
+            ' ' + x + ' '
+        ) >= 0
     
 
     def isDigit(self, ch) -> bool:
