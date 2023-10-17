@@ -914,6 +914,25 @@ class ImgFilter:
         
         # If assignment token, then save the variable to the environment
         if typ == 'assign':
+            # If the token that is to be saved is an index
+            if token.left.type == 'index':
+                if token.left.var.value != 'pixels':
+                    raise SyntaxError(f'Cannot assign to {token.left}')
+                if len(token.left.index) != 2:
+                    raise SyntaxError(f'index must include x and y')
+                if token.right.value.value != 'rgb':
+                    raise SyntaxError(
+                        f'rgb function must be used to save to pixels'
+                    )
+                
+                x = self.evaluate(token.left.index[0], env)
+                y = self.evaluate(token.left.index[1], env)
+
+                color = self.evaluate(token.right, env)
+                env[token.left.value][x, y] = color
+
+                return color
+
             # If the token that is supposed to be saved to isn't a
             # variable name, then throw an error
             if token.left.type != 'var':
