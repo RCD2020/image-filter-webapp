@@ -1030,11 +1030,11 @@ class ImgFilter:
 
         scope = Environment(parent=env)
 
-        self.evaluate(token.init, env)
+        self.evaluate(token.init, scope)
 
-        while self.evaluate(token.cond, env):
-            self.evaluate(token.body, env)
-            self.evaluate(token.incr, env)
+        while self.evaluate(token.cond, scope):
+            self.evaluate(token.body, scope)
+            self.evaluate(token.incr, scope)
         
         return None
     
