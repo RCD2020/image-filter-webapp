@@ -893,7 +893,8 @@ class ImgFilter:
         self.env = Environment({
             'pixels': self.pixels,
             'width': self.width,
-            'height': self.height
+            'height': self.height,
+            'rgb': lambda r, g, b : (r, g, b)
         })
 
 
@@ -929,7 +930,7 @@ class ImgFilter:
                 y = self.evaluate(token.left.index[1], env)
 
                 color = self.evaluate(token.right, env)
-                env[token.left.value][x, y] = color
+                env[token.left.var.value][x, y] = color
 
                 return color
 
@@ -1107,4 +1108,4 @@ if __name__ == '__main__':
 
     img(text)
     print(img.env.vars)
-    img.show()
+    img.img.show()
