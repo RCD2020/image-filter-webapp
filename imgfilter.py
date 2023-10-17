@@ -147,6 +147,24 @@ class FuncToken(Token):
         )
 
 
+class ForToken:
+    """This is a for token. It defines a for loop, its initialization,
+    its condition, and its increment condition."""
+
+    def __init__(self, tType: str, init, cond, incr):
+        self.type = tType
+        self.init = init
+        self.cond = cond
+        self.incr = incr
+
+    
+    def __str__(self):
+        return (
+            f'ForToken(type: {self.type}, init: {self.init}, '
+            f'cond: {self.cond}, incr: {self.incr})'
+        )
+
+
 class Tokenizer:
     """This is the tokenizer. Utilizing the InputStream, it converts
     data read in from the input into Tokens that define the data."""
