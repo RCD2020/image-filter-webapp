@@ -4,9 +4,13 @@
 
 <img src="/static/images/source/{{ path }}" height="{{ height }}" width="{{ width }}">
 
+<br>
+
+<a href="/">Home</a>
 <form method="post" action="/filtered">
     <input type="hidden" name="filename" value="{{ path }}">
     <textarea name="filter-text"></textarea>
+    <br>
     <input type="submit" value="Submit">
 </form>
 

@@ -1,0 +1,17 @@
+html {
+    background-color: #5cc8ff;
+    color: #343633;
+    font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    text-align: center;
+}
+
+img {
+    border-style: solid;
+}
+
+.alert {
+    border-style: solid;
+    background-color: pink;
+    padding: 5px;
+    border-radius: 25px;
+}
