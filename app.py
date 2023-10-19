@@ -106,8 +106,17 @@ def filtered_page():
     
     imgFilter = ImgFilter(filename)
     imgFilter(filter_text)
+
+    height = imgFilter.height
+    width = imgFilter.width
     
-    return render_template('filtered.html', path=filename)
+    factor = 750 / max(width, height)
+    width *= factor
+    height *= factor
+    
+    return render_template(
+        'filtered.html', path=filename, width=width, height=height
+    )
 
 if __name__ == '__main__':
     app.run(debug=True)
