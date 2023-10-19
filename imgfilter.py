@@ -897,7 +897,7 @@ class ImgFilter:
             'pixels': self.pixels,
             'width': self.width,
             'height': self.height,
-            'rgb': lambda r, g, b : (r, g, b),
+            'rgb': lambda r, g, b : (int(r), int(g), int(b)),
             'loadColor': lambda x, y : self.loadColor(x, y)
         })
 
