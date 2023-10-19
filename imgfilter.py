@@ -1,4 +1,5 @@
 from PIL import Image
+import math
 import re
 
 class InputStream:
@@ -515,10 +516,10 @@ class Parser:
             )
 
     
-    def unexpected(self):
+    def unexpected(self, token):
         "Throws an error, call when encountering an unexpected token."
 
-        self.input.throw(f'Unexpected Token: {self.input.peek()}')
+        self.input.throw(f'Unexpected Token: {token}')
 
 
     def maybeBinary(self, left, prec):
@@ -759,7 +760,7 @@ class Parser:
             return token
         
         # Throws an error because unknown Token
-        self.unexpected()
+        self.unexpected(token)
 
 
     def parseAtom(self):
@@ -898,7 +899,10 @@ class ImgFilter:
             'width': self.width,
             'height': self.height,
             'rgb': lambda r, g, b : (int(r), int(g), int(b)),
-            'loadColor': lambda x, y : self.loadColor(x, y)
+            'loadColor': lambda x, y : self.loadColor(x, y),
+            'makeRef': self.makeRef,
+            'loadRef': lambda x, y : self.loadRef(x, y),
+            'sqrt': lambda x : math.sqrt(x)
         })
 
 
@@ -1097,6 +1101,18 @@ class ImgFilter:
 
     def loadColor(self, x, y):
         r, g, b = self.pixels[x, y]
+
+        self.env['r'] = r
+        self.env['g'] = g
+        self.env['b'] = b
+
+
+    def makeRef(self):
+        self.ref = self.img.copy().load()
+
+
+    def loadRef(self, x, y):
+        r, g, b = self.ref[x, y]
 
         self.env['r'] = r
         self.env['g'] = g
