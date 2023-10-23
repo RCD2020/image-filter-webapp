@@ -164,3 +164,6 @@ test.*
 test2.*
 /filters
 *.icloud
+
+# ds store
+*.DS_STORE
