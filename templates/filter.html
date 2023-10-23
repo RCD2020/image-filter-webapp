@@ -53,4 +53,17 @@ g, and b</p>
 <p>In order to make an image appear sepia toned, we use an algorithm
 that uses math to alter our rgb values to have that brownish hue.</p>
 
+
+<h3>Sobel's Edge Detection</h3>
+<img src="/static/examples/eiffel.png" alt="Eiffel Tower, Sobel's edge detection">
+<img src="/static/examples/watgetty.png" alt="Angkor Wat, Sobel's edge detection">
+
+<br>
+
+<button onclick="sobel()">Try it!</button>
+
+<p><a href="https://en.wikipedia.org/wiki/Sobel_operator">The Sobel operator</a>
+is an edge detection algorithm. Using it, we can adjust the brightness
+of each pixel according to how much it seems to be an edge.</p>
+
 {% endblock %}
