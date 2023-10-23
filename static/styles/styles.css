@@ -23,36 +23,6 @@ img {
 .imageContainer {
     display: flex;
     flex-direction: row;
-    gap: 25px;
+    gap: 37px;
     width: 200%;
-}
-
-.imageContainer, .image {
-    height: 200px;
-    width: 100%;
-    background-size: cover;
-}
-
-.image:nth-child(1) {
-    background-image: url('/static/examples/tajmahal.png');
-}
-
-.image:nth-child(2) {
-    background-image: url('/static/examples/piza.png');
-}
-
-.image:nth-child(3) {
-    background-image: url('/static/examples/eiffel.png');
-}
-
-.image:nth-child(4) {
-    background-image: url('/static/examples/pyramid.png');
-}
-
-.image:nth-child(5) {
-    background-image: url('/static/examples/giza.png');
-}
-
-.image:nth-child(6) {
-    background-image: url('/static/examples/watgetty.png');
 }
