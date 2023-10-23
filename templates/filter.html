@@ -1,5 +1,12 @@
 {% extends "layout.html" %}
 
+{% block head %}
+<!-- Code Mirror -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.js" integrity="sha512-4i/wqLBUQRN1JXTwHTYjnZXUVi57tiOAMehaWWLqCXJpaIz9tgtOKJuEPUuBZ0+G7Bh/XJIsU/+gTCHBOWlFTw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.css" integrity="sha512-7vaQ4LLdaXd2IuMd4MUQ6LRFIGbEwJI1aq6KYqL3RjbdQyUkRFhwZKmqmkBXurTFdGlx687lTN8FSJfX6Df8Gw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+{% endblock %}
+
+
 {% block body %}
 
 <img src="/static/images/source/{{ path }}" height="{{ height }}" width="{{ width }}">
@@ -7,11 +14,20 @@
 <br>
 
 <a href="/">Home</a>
+
+<br>
+<br>
 <form method="post" action="/filtered">
     <input type="hidden" name="filename" value="{{ path }}">
-    <textarea name="filter-text"></textarea>
+    <textarea name="filter-text" id="code"></textarea>
     <br>
     <input type="submit" value="Submit">
 </form>
+
+<script>
+    var editor = CodeMirror.fromTextArea(document.getElementById('code'), {
+        lineNumbers: true
+    });
+</script>
 
 {% endblock %}

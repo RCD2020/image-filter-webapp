@@ -26,3 +26,7 @@ img {
     gap: 37px;
     width: 200%;
 }
+
+.CodeMirror {
+    text-align: left;
+}
