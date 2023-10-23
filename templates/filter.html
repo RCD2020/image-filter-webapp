@@ -4,6 +4,7 @@
 <!-- Code Mirror -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.js" integrity="sha512-4i/wqLBUQRN1JXTwHTYjnZXUVi57tiOAMehaWWLqCXJpaIz9tgtOKJuEPUuBZ0+G7Bh/XJIsU/+gTCHBOWlFTw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.css" integrity="sha512-7vaQ4LLdaXd2IuMd4MUQ6LRFIGbEwJI1aq6KYqL3RjbdQyUkRFhwZKmqmkBXurTFdGlx687lTN8FSJfX6Df8Gw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<script src="/static/js/filtered.js" defer></script>
 {% endblock %}
 
 
@@ -24,10 +25,21 @@
     <input type="submit" value="Submit">
 </form>
 
-<script>
-    var editor = CodeMirror.fromTextArea(document.getElementById('code'), {
-        lineNumbers: true
-    });
-</script>
+<hr>
+
+<h2>Common Filters</h2>
+
+<h3>Grayscale</h3>
+<img src="/static/examples/tajmahal.png" alt="Taj Mahal, grayscaled">
+<img src="/static/examples/pyramid.png" alt="Chichen-Itza, grayscaled">
+
+<br>
+
+<button onclick="grayscale()">Try it!</button>
+
+<p>In order to grayscale an image, what you must do is get the average
+of the rgb values across the pixel, and then apply the average to r,
+g, and b</p>
+
 
 {% endblock %}
