@@ -23,8 +23,8 @@ img {
 .imageContainer {
     display: flex;
     flex-direction: row;
-    gap: 37px;
-    width: 200%;
+    justify-content: space-between;
+    padding: 1%;
 }
 
 .CodeMirror {
